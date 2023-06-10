@@ -30,7 +30,7 @@ while True:
             #     time.sleep(1)
             #     continue
 
-            os.system(f'sudo tc qdisc add dev {nic} root handle 1: tbf rate {DL_bitrate}mbit burst {burst}kbit limit 5000kbit') #apply traffic settings
+            os.system(f'sudo tc qdisc add dev {nic} root handle 1: tbf rate {DL_bitrate}mbit burst {burst}kbit limit 500kbit') #apply traffic settings
             os.system(f'sudo tc qdisc show dev {nic}') #show current traffic settings
             os.system(f'sudo tc qdisc del dev {nic} root')
             time.sleep(1) #delay for 1s
