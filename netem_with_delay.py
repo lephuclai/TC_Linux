@@ -19,23 +19,25 @@ while True:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
         for row in csv_reader:
-            DL_bitrate = float(row[12])/10
+            DL_bitrate = float(row[12])/25
             UL_bitrate = float(row[13])
             if line_count == 0:
                 command_start = time.time()
-                os.system(f'sudo tc qdisc add dev {nic1} root tbf rate {DL_bitrate}kbit burst 50kbit limit 500kbit')
+                os.system(f'sudo tc qdisc add dev {nic1} root handle 1: netem delay 13ms 1ms distribution normal')
+                os.system(f'sudo tc qdisc add dev {nic1} parent 1: handle 2: tbf rate {DL_bitrate}kbit burst 50kbit limit 500kbit')
                 os.system(f'sudo tc qdisc show dev {nic1}')
-                os.system(f'sudo tc qdisc add dev {nic2} root tbf rate {UL_bitrate}kbit burst 50kbit limit 500kbit') #apply >
-                os.system(f'sudo tc qdisc show dev {nic2}') #show current traffic settings
+                os.system(f'sudo tc qdisc add dev {nic2} root handle 1: netem delay 13ms 1ms distribution normal')
+                os.system(f'sudo tc qdisc add dev {nic2} parent 1: handle 2: tbf rate {UL_bitrate}kbit burst 50kbit limit 500kbit')
+                os.system(f'sudo tc qdisc show dev {nic2}')
                 line_count +=1
                 time.sleep(1- (time.time() - command_start))
                 continue
             command_start = time.time()
             
-            os.system(f'sudo tc qdisc change dev {nic1} root tbf rate {DL_bitrate}kbit burst 50kbit limit 500kbit') #apply traffic settings
+            os.system(f'sudo tc qdisc change dev {nic1} parent 1: handle 2: tbf rate {DL_bitrate}kbit burst 50kbit limit 500kbit') #apply traffic settings
             os.system(f'sudo tc qdisc show dev {nic1}') #show current traffic settings
             
-            os.system(f'sudo tc qdisc change dev {nic2} root tbf rate {UL_bitrate}kbit burst 50kbit limit 500kbit') #apply traffic settings
+            os.system(f'sudo tc qdisc change dev {nic2} parent 1: handle 2: tbf rate {UL_bitrate}kbit burst 50kbit limit 500kbit') #apply traffic settings
             os.system(f'sudo tc qdisc show dev {nic2}') #show current traffic settings
             
             time.sleep(1 - (time.time() - command_start))
